@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evolusi Konstitusi: UUD 1945 Pasca-Amandemen</title>
+  <meta name="description" content="Aplikasi edukasi interaktif tentang dinamika UUD 1945 pasca-amandemen: kesepakatan dasar MPR, linimasa empat tahap amandemen, komparasi sebelum dan sesudah, serta kuis pemahaman." />
+  <meta name="theme-color" content="#8B0000" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            marun: { DEFAULT: '#8B0000', 50: '#FDF2F2', 100: '#FBE4E4', 200: '#F5C2C2', 600: '#B91C1C', 700: '#991B1B', 800: '#8B0000', 900: '#5C0A0A', 950: '#3B0606' },
+            emas:  { DEFAULT: '#D97706', 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309' },
+            kanvas: '#F8FAFC'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            serif: ['Fraunces', 'Georgia', 'serif']
+          },
+          boxShadow: {
+            soft: '0 1px 2px rgba(15,23,42,.04), 0 8px 24px -8px rgba(15,23,42,.10)',
+            lift: '0 2px 4px rgba(15,23,42,.05), 0 18px 40px -12px rgba(139,0,0,.22)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root { --marun: #8B0000; --marun-700: #991B1B; --emas: #D97706; --emas-500: #F59E0B; --kanvas: #F8FAFC; }
+    body { background: var(--kanvas); color: #0f172a; font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    ::selection { background: #FDE68A; color: #3B0606; }
+
+    /* Hero ornament: subtle geometric batik-like pattern */
+    .hero-pattern {
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(245,158,11,.22) 1px, transparent 0),
+        linear-gradient(135deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.04) 50%, rgba(255,255,255,.04) 75%, transparent 75%);
+      background-size: 22px 22px, 44px 44px;
+    }
+    .gold-rule { height: 3px; width: 64px; border-radius: 9999px; background: linear-gradient(90deg, #D97706, #F59E0B); }
+
+    /* Reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.is-visible { opacity: 1; transform: none; }
+
+    /* Agreement cards */
+    .agree-card .agree-detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
+    .agree-card .agree-detail > div { overflow: hidden; }
+    .agree-card[aria-expanded="true"] .agree-detail { grid-template-rows: 1fr; }
+    .agree-card[aria-expanded="true"] { border-color: #F59E0B; box-shadow: 0 2px 4px rgba(15,23,42,.05), 0 18px 40px -12px rgba(139,0,0,.22); }
+    .agree-card[aria-expanded="true"] .agree-num { background: #8B0000; color: #FEF3C7; }
+    .agree-card[aria-expanded="true"] .agree-chevron { transform: rotate(180deg); }
+
+    /* Timeline */
+    .tl-step[aria-selected="true"] .tl-dot { background: #8B0000; color: #fff; border-color: #F59E0B; box-shadow: 0 0 0 6px rgba(245,158,11,.25); }
+    .tl-step[aria-selected="true"] .tl-label { color: #8B0000; }
+    .tl-panel { animation: fadeUp .4s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* Comparison */
+    .seg-btn[aria-pressed="true"] { background: #8B0000; color: #fff; box-shadow: 0 4px 12px -4px rgba(139,0,0,.5); }
+    .cmp-table[data-mode="sebelum"] .col-sesudah,
+    .cmp-table[data-mode="sesudah"] .col-sebelum { display: none; }
+    .cmp-row .cmp-note { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+    .cmp-row .cmp-note > div { overflow: hidden; }
+    .cmp-row.is-open .cmp-note { grid-template-rows: 1fr; }
+    .cmp-row.is-open .cmp-chevron { transform: rotate(180deg); }
+
+    /* Quiz */
+    .opt { transition: background-color .2s, border-color .2s, transform .15s; }
+    .opt:not(:disabled):hover { border-color: #F59E0B; background: #FFFBEB; transform: translateX(2px); }
+    .opt.is-correct { background: #ECFDF5; border-color: #10B981; color: #065F46; }
+    .opt.is-wrong { background: #FEF2F2; border-color: #EF4444; color: #991B1B; animation: shake .35s ease; }
+    .opt.is-dim { opacity: .55; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+    .ring-progress { transition: stroke-dashoffset 1s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body class="bg-kanvas text-slate-900 font-sans antialiased">
+
+  <!-- ============ NAVBAR ============ -->
+  <header id="topbar" class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200/70 transition-shadow duration-300">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between" aria-label="Navigasi utama">
+      <a href="#beranda" class="flex items-center gap-2.5 group">
+        <span class="w-9 h-9 rounded-lg bg-marun text-emas-100 grid place-items-center font-serif font-bold text-lg shadow-md ring-2 ring-emas-500/40">§</span>
+        <span class="leading-tight">
+          <span class="block text-sm font-extrabold tracking-tight text-marun nav-brand">Evolusi Konstitusi</span>
+          <span class="block text-[11px] font-medium text-slate-500 nav-sub">UUD NRI 1945</span>
+        </span>
+      </a>
+      <ul class="hidden md:flex items-center gap-1 text-sm font-semibold">
+        <li><a href="#kesepakatan" class="nav-link px-3 py-2 rounded-lg text-slate-600 hover:text-marun hover:bg-marun-50 transition">Kesepakatan</a></li>
+        <li><a href="#linimasa" class="nav-link px-3 py-2 rounded-lg text-slate-600 hover:text-marun hover:bg-marun-50 transition">Linimasa</a></li>
+        <li><a href="#komparasi" class="nav-link px-3 py-2 rounded-lg text-slate-600 hover:text-marun hover:bg-marun-50 transition">Komparasi</a></li>
+        <li><a href="#kuis" class="ml-2 px-4 py-2 rounded-lg bg-marun text-white hover:bg-marun-700 shadow-sm transition">Mulai Kuis</a></li>
+      </ul>
+      <button id="menuBtn" class="md:hidden w-10 h-10 grid place-items-center rounded-lg text-marun hover:bg-marun-50" aria-label="Buka menu" aria-expanded="false" aria-controls="mobileMenu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </nav>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200 bg-white/95 backdrop-blur">
+      <ul class="px-4 py-3 space-y-1 text-sm font-semibold">
+        <li><a href="#kesepakatan" class="block px-3 py-2.5 rounded-lg text-slate-700 hover:bg-marun-50">Kesepakatan Dasar</a></li>
+        <li><a href="#linimasa" class="block px-3 py-2.5 rounded-lg text-slate-700 hover:bg-marun-50">Linimasa Amandemen</a></li>
+        <li><a href="#komparasi" class="block px-3 py-2.5 rounded-lg text-slate-700 hover:bg-marun-50">Sebelum vs Sesudah</a></li>
+        <li><a href="#kuis" class="block px-3 py-2.5 rounded-lg bg-marun text-white text-center">Mulai Kuis</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section id="beranda" class="relative overflow-hidden bg-gradient-to-br from-marun-950 via-marun to-marun-700 text-white">
+      <div class="absolute inset-0 hero-pattern opacity-70" aria-hidden="true"></div>
+      <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-emas-500/20 blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -left-32 bottom-0 w-80 h-80 rounded-full bg-white/5 blur-3xl" aria-hidden="true"></div>
+
+      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-24 sm:pt-24 sm:pb-32">
+        <div class="max-w-3xl">
+          <span class="inline-flex items-center gap-2 rounded-full border border-emas-400/40 bg-white/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-emas-200 backdrop-blur">
+            <span class="w-1.5 h-1.5 rounded-full bg-emas-400 animate-pulse"></span>
+            Modul Pendidikan Pancasila &amp; Kewarganegaraan
+          </span>
+          <h1 class="mt-6 font-serif font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight">
+            Evolusi Konstitusi:
+            <span class="block bg-gradient-to-r from-emas-200 via-emas-400 to-emas-500 bg-clip-text text-transparent">UUD 1945 Pasca-Amandemen</span>
+          </h1>
+          <p class="mt-6 text-base sm:text-lg text-red-50/85 leading-relaxed max-w-2xl">
+            Gelombang Reformasi 1998 melahirkan tuntutan untuk menata ulang konstitusi. Melalui empat tahap perubahan,
+            UUD 1945 kini menegaskan <strong class="text-white font-semibold">kedaulatan rakyat</strong>, memperkuat
+            <strong class="text-white font-semibold">jaminan hak asasi manusia</strong>, dan membangun
+            <em class="text-emas-200 not-italic font-semibold">checks and balances</em> antarlembaga negara.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#kesepakatan" class="inline-flex items-center gap-2 rounded-xl bg-emas-500 hover:bg-emas-400 text-marun-950 font-bold px-5 py-3 shadow-lg shadow-black/20 transition">
+              Jelajahi Materi
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </a>
+            <a href="#kuis" class="inline-flex items-center gap-2 rounded-xl border border-white/30 hover:bg-white/10 font-semibold px-5 py-3 transition">Uji Pemahaman</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick stats (overlapping hero) -->
+    <section class="relative z-10 -mt-14 sm:-mt-16 px-4 sm:px-6" aria-label="Ringkasan angka">
+      <div class="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-100 p-4 sm:p-6">
+          <div class="flex items-baseline gap-1"><span class="counter font-serif font-extrabold text-3xl sm:text-4xl text-marun" data-target="4">0</span><span class="text-sm font-bold text-emas-600">tahap</span></div>
+          <p class="mt-1 text-xs sm:text-sm font-semibold text-slate-600">Amandemen</p>
+        </div>
+        <div class="rounded-xl bg-white shadow-soft border border-slate-100 p-4 sm:p-6">
+          <div class="font-serif font-extrabold text-3xl sm:text-4xl text-marun">1999<span class="text-emas-500">–</span><span class="text-xl sm:text-2xl">2002</span></div>
+          <p class="mt-1 text-xs sm:text-sm font-semibold text-slate-600">Rentang perubahan</p>
+        </div>
+        <div class="rounded-xl bg-white shadow-soft border border-slate-100 p-4 sm:p-6">
+          <div class="flex items-baseline gap-1"><span class="counter font-serif font-extrabold text-3xl sm:text-4xl text-marun" data-target="73">0</span><span class="text-sm font-bold text-emas-600">pasal</span></div>
+          <p class="mt-1 text-xs sm:text-sm font-semibold text-slate-600">Sebelumnya 37 pasal</p>
+        </div>
+        <div class="rounded-xl bg-white shadow-soft border border-slate-100 p-4 sm:p-6">
+          <div class="flex items-baseline gap-1"><span class="counter font-serif font-extrabold text-3xl sm:text-4xl text-marun" data-target="21">0</span><span class="text-sm font-bold text-emas-600">bab</span></div>
+          <p class="mt-1 text-xs sm:text-sm font-semibold text-slate-600">Sebelumnya 16 bab</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ B. KESEPAKATAN DASAR ============ -->
+    <section id="kesepakatan" class="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24">
+      <div class="reveal max-w-2xl">
+        <p class="text-xs font-bold uppercase tracking-[.18em] text-emas-600">Materi 1</p>
+        <h2 class="mt-2 font-serif font-bold text-3xl sm:text-4xl text-marun-900">5 Kesepakatan Dasar MPR</h2>
+        <div class="gold-rule mt-4"></div>
+        <p class="mt-4 text-slate-600 leading-relaxed">Sebelum mengubah satu pasal pun, Panitia Ad Hoc I Badan Pekerja MPR menyepakati lima rambu agar perubahan tetap berpijak pada fondasi negara. <span class="font-semibold text-slate-700">Klik setiap kartu</span> untuk membaca maknanya.</p>
+      </div>
+      <div id="agreeGrid" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 items-start"></div>
+    </section>
+
+    <!-- ============ C. LINIMASA ============ -->
+    <section id="linimasa" class="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28">
+      <div class="reveal max-w-2xl">
+        <p class="text-xs font-bold uppercase tracking-[.18em] text-emas-600">Materi 2</p>
+        <h2 class="mt-2 font-serif font-bold text-3xl sm:text-4xl text-marun-900">Linimasa 4 Tahap Amandemen</h2>
+        <div class="gold-rule mt-4"></div>
+        <p class="mt-4 text-slate-600 leading-relaxed">Perubahan dilakukan bertahap dalam sidang-sidang MPR selama empat tahun. Pilih satu tahap untuk melihat fokus perubahannya.</p>
+      </div>
+
+      <div class="reveal mt-10 rounded-2xl bg-white shadow-soft border border-slate-100 p-4 sm:p-8">
+        <!-- Steps -->
+        <div class="relative">
+          <div class="absolute left-[12.5%] right-[12.5%] top-6 h-1 rounded-full bg-slate-200" aria-hidden="true"></div>
+          <div id="tlProgress" class="absolute left-[12.5%] top-6 h-1 rounded-full bg-gradient-to-r from-marun to-emas-500 transition-all duration-500" style="width:0" aria-hidden="true"></div>
+          <div id="tlSteps" role="tablist" aria-label="Tahap amandemen" class="relative grid grid-cols-4"></div>
+        </div>
+        <!-- Panel -->
+        <div id="tlPanelWrap" class="mt-8"></div>
+        <div class="mt-6 flex items-center justify-between gap-3 border-t border-slate-100 pt-5">
+          <button id="tlPrev" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:text-marun hover:bg-marun-50 disabled:opacity-40 disabled:pointer-events-none transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg> Sebelumnya
+          </button>
+          <span class="text-xs text-slate-400 hidden sm:block">Tip: gunakan tombol panah ← → pada keyboard</span>
+          <button id="tlNext" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:text-marun hover:bg-marun-50 disabled:opacity-40 disabled:pointer-events-none transition">
+            Berikutnya <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ D. KOMPARASI ============ -->
+    <section id="komparasi" class="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28">
+      <div class="reveal flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div class="max-w-2xl">
+          <p class="text-xs font-bold uppercase tracking-[.18em] text-emas-600">Materi 3</p>
+          <h2 class="mt-2 font-serif font-bold text-3xl sm:text-4xl text-marun-900">Sebelum vs Sesudah Amandemen</h2>
+          <div class="gold-rule mt-4"></div>
+          <p class="mt-4 text-slate-600 leading-relaxed">Bandingkan wajah konstitusi sebelum dan sesudah perubahan. Ganti tampilan di samping, lalu klik baris mana pun untuk melihat alasan di balik perubahannya.</p>
+        </div>
+        <div class="inline-flex self-start lg:self-auto rounded-xl bg-white border border-slate-200 p-1 shadow-sm" role="group" aria-label="Mode tampilan komparasi">
+          <button class="seg-btn rounded-lg px-3.5 sm:px-4 py-2 text-sm font-semibold text-slate-600 transition" data-mode="sebelum" aria-pressed="false">Sebelum</button>
+          <button class="seg-btn rounded-lg px-3.5 sm:px-4 py-2 text-sm font-semibold text-slate-600 transition" data-mode="both" aria-pressed="true">Bandingkan</button>
+          <button class="seg-btn rounded-lg px-3.5 sm:px-4 py-2 text-sm font-semibold text-slate-600 transition" data-mode="sesudah" aria-pressed="false">Sesudah</button>
+        </div>
+      </div>
+
+      <div class="reveal mt-8 rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
+        <div id="cmpTable" class="cmp-table" data-mode="both">
+          <!-- header -->
+          <div class="hidden sm:grid grid-cols-[1.1fr_1fr_1fr_auto] gap-4 px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase tracking-wider">
+            <div class="text-slate-500">Aspek</div>
+            <div class="col-sebelum text-slate-500">Sebelum <span class="normal-case font-semibold tracking-normal text-slate-400">(UUD 1945 asli)</span></div>
+            <div class="col-sesudah text-marun">Sesudah <span class="normal-case font-semibold tracking-normal text-emas-600">(UUD NRI 1945)</span></div>
+            <div class="w-5"></div>
+          </div>
+          <div id="cmpRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ E. KUIS ============ -->
+    <section id="kuis" class="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-24">
+      <div class="reveal text-center max-w-2xl mx-auto">
+        <p class="text-xs font-bold uppercase tracking-[.18em] text-emas-600">Knowledge Check</p>
+        <h2 class="mt-2 font-serif font-bold text-3xl sm:text-4xl text-marun-900">Kuis Pemahaman</h2>
+        <div class="gold-rule mt-4 mx-auto"></div>
+        <p class="mt-4 text-slate-600 leading-relaxed">Uji seberapa jauh kamu memahami dinamika UUD 1945 pasca-amandemen. Pilih satu jawaban — umpan balik muncul seketika.</p>
+      </div>
+
+      <div class="reveal mt-10 max-w-3xl mx-auto">
+        <div id="quizCard" class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="bg-marun-950 text-red-100/70">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between text-sm">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-marun text-emas-200 grid place-items-center font-serif font-bold ring-1 ring-emas-500/40">§</span>
+        <span><span class="font-semibold text-white">Evolusi Konstitusi</span> — media belajar UUD NRI Tahun 1945.</span>
+      </div>
+      <p class="text-xs text-red-100/50">Rujukan: Naskah UUD NRI 1945 dan Perubahan I–IV, MPR RI.</p>
+    </div>
+  </footer>
+
+  <script>
+  (() => {
+    'use strict';
+
+    /* ---------------- DATA ---------------- */
+    const AGREEMENTS = [
+      { icon: 'scroll', title: 'Tidak mengubah Pembukaan UUD 1945',
+        body: 'Pembukaan memuat dasar filosofis negara — Pancasila, tujuan nasional, dan cita-cita kemerdekaan. Mengubahnya sama dengan membubarkan negara yang diproklamasikan 17 Agustus 1945.' },
+      { icon: 'map', title: 'Tetap mempertahankan NKRI',
+        body: 'Bentuk Negara Kesatuan Republik Indonesia dikunci. Pasal 37 ayat (5) bahkan menegaskan bahwa bentuk NKRI tidak dapat dilakukan perubahan.' },
+      { icon: 'building', title: 'Mempertegas sistem presidensial',
+        body: 'Presiden dipilih langsung oleh rakyat, memiliki masa jabatan yang pasti, dan tidak mudah dijatuhkan oleh parlemen — sekaligus diawasi melalui mekanisme pemakzulan yang ketat.' },
+      { icon: 'arrow', title: 'Penjelasan normatif dimasukkan ke pasal',
+        body: 'Bagian Penjelasan ditiadakan. Hal-hal normatif di dalamnya dipindahkan ke dalam pasal-pasal sehingga memiliki kekuatan hukum yang jelas.' },
+      { icon: 'plus', title: 'Perubahan dilakukan dengan cara adendum',
+        body: 'Naskah asli tetap dipertahankan sebagai dokumen sejarah; perubahan dilekatkan pada naskah tersebut (misalnya muncul Pasal 6A, 7A, 28A–28J) tanpa mengganti nomor pasal yang lama.' }
+    ];
+
+    const ICONS = {
+      scroll: '<path stroke-linecap="round" stroke-linejoin="round" d="M8 4h9a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V7m3-3a2 2 0 00-2 2v1H4V6a2 2 0 012-2h2zm1 6h7m-7 4h7"/>',
+      map: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5-2V4l5 2m0 14l6-2m-6 2V6m6 12l5 2V6l-5-2m0 14V4m0 0L9 6"/>',
+      building: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 10h16M5 10V21m4-11v11m6-11v11m4-11v11M12 3l9 5H3l9-5z"/>',
+      arrow: '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h10M4 12h7m-7 6h10m3-9l3 3-3 3m3-3h-6"/>',
+      plus: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z"/>'
+    };
+
+    const STAGES = [
+      { no: 'I', year: '1999', date: '19 Oktober 1999', forum: 'Sidang Umum MPR 1999',
+        theme: 'Membatasi kekuasaan presiden',
+        intro: 'Langkah pertama Reformasi: menggeser titik berat kekuasaan dari eksekutif ke legislatif agar tidak lagi terjadi pemusatan kekuasaan.',
+        points: [
+          { pasal: 'Pasal 7', text: 'Masa jabatan presiden dan wakil presiden dibatasi lima tahun dan hanya dapat dipilih kembali untuk satu kali masa jabatan yang sama (maksimal dua periode).' },
+          { pasal: 'Pasal 5 & 20', text: 'Kekuasaan membentuk undang-undang bergeser ke DPR; presiden kini berhak mengajukan rancangan undang-undang.' },
+          { pasal: 'Pasal 13–17', text: 'Hak prerogatif presiden (mengangkat duta, memberi grasi, amnesti, abolisi) disertai pertimbangan MA atau DPR.' }
+        ] },
+      { no: 'II', year: '2000', date: '18 Agustus 2000', forum: 'Sidang Tahunan MPR 2000',
+        theme: 'Otonomi daerah & hak asasi manusia',
+        intro: 'Perubahan terluas dari sisi jaminan warga negara: hak asasi mendapat bab tersendiri dan daerah diberi ruang mengatur rumah tangganya.',
+        points: [
+          { pasal: 'Pasal 18, 18A, 18B', text: 'Pemerintahan daerah dijalankan dengan otonomi seluas-luasnya; kekhususan dan keragaman daerah diakui.' },
+          { pasal: 'Pasal 19–22B', text: 'Penguatan DPR: anggota dipilih melalui pemilu, fungsi legislasi–anggaran–pengawasan, serta hak interpelasi, angket, dan menyatakan pendapat.' },
+          { pasal: 'Pasal 28A–28J', text: 'Bab XA khusus tentang Hak Asasi Manusia — dari hak hidup hingga kewajiban menghormati hak orang lain.' },
+          { pasal: 'Pasal 36A–36C', text: 'Simbol negara: Lambang Garuda Pancasila dan lagu kebangsaan Indonesia Raya, melengkapi bendera dan bahasa.' }
+        ] },
+      { no: 'III', year: '2001', date: '9 November 2001', forum: 'Sidang Tahunan MPR 2001',
+        theme: 'Menata ulang lembaga negara',
+        intro: 'Tahap paling mendasar secara kelembagaan: MPR tak lagi pelaksana penuh kedaulatan, dan lahir lembaga-lembaga baru penyeimbang kekuasaan.',
+        points: [
+          { pasal: 'Pasal 1 ayat (2)–(3)', text: 'Kedaulatan berada di tangan rakyat dan dilaksanakan menurut UUD; Indonesia ditegaskan sebagai negara hukum.' },
+          { pasal: 'Pasal 6A', text: 'Presiden dan wakil presiden dipilih dalam satu pasangan secara langsung oleh rakyat.' },
+          { pasal: 'Pasal 22C, 24B, 24C', text: 'Lembaga baru: Dewan Perwakilan Daerah (DPD), Komisi Yudisial (KY), dan Mahkamah Konstitusi (MK).' },
+          { pasal: 'Pasal 7A–7B', text: 'Mekanisme pemakzulan (impeachment): usul DPR, pemeriksaan MK, lalu keputusan MPR.' }
+        ] },
+      { no: 'IV', year: '2002', date: '10 Agustus 2002', forum: 'Sidang Tahunan MPR 2002',
+        theme: 'Penyempurnaan & penutup',
+        intro: 'Tahap penuntas: merapikan sisa ketentuan, menegaskan hak sosial-ekonomi warga, dan mengatur tata cara perubahan konstitusi ke depan.',
+        points: [
+          { pasal: 'Bab IV', text: 'Dewan Pertimbangan Agung (DPA) dihapus; fungsi pemberian nasihat kepada presiden dijalankan dewan pertimbangan di bawah presiden (Pasal 16).' },
+          { pasal: 'Pasal 31 ayat (4)', text: 'Negara memprioritaskan anggaran pendidikan sekurang-kurangnya 20% dari APBN dan APBD.' },
+          { pasal: 'Pasal 37', text: 'Tata cara perubahan UUD diperjelas, termasuk penegasan bahwa bentuk NKRI tidak dapat diubah.' },
+          { pasal: 'Aturan Peralihan & Tambahan', text: 'Ketentuan transisi kelembagaan, serta penegasan bahwa UUD 1945 terdiri atas Pembukaan dan pasal-pasal.' }
+        ] }
+    ];
+
+    const COMPARE = [
+      { aspect: 'Sistematika', before: '3 bagian', beforeSub: 'Pembukaan, Batang Tubuh, Penjelasan', after: '2 bagian', afterSub: 'Pembukaan dan Pasal-pasal',
+        note: 'Penjelasan ditiadakan karena kedudukannya tidak jelas secara hukum; muatan normatifnya dipindah ke pasal-pasal (Pasal II Aturan Tambahan).' },
+      { aspect: 'Jumlah Bab', before: '16 bab', beforeSub: '', after: '21 bab', afterSub: 'termasuk bab baru, mis. Bab XA tentang HAM',
+        note: 'Penambahan bab dilakukan dengan sisipan huruf (VIIA, VIIB, VIIIA, IXA, XA) sesuai prinsip adendum, sehingga nomor bab lama tidak bergeser.' },
+      { aspect: 'Jumlah Pasal', before: '37 pasal', beforeSub: '', after: '73 pasal', afterSub: 'nomor tetap berakhir di Pasal 37',
+        note: 'Pasal baru disisipkan dengan huruf (6A, 7A–7C, 22C–22E, 28A–28J, dst.), sehingga jumlahnya hampir dua kali lipat tanpa mengubah penomoran asli.' },
+      { aspect: 'Posisi MPR', before: 'Lembaga Tertinggi Negara', beforeSub: 'pelaksana penuh kedaulatan rakyat', after: 'Lembaga Tinggi Negara', afterSub: 'setara dengan lembaga negara lain',
+        note: 'Pasal 1 ayat (2) diubah: kedaulatan dilaksanakan menurut UUD, bukan sepenuhnya oleh MPR. Hubungan antarlembaga menjadi horizontal dan saling mengawasi.' },
+      { aspect: 'Pemilihan Presiden', before: 'Dipilih oleh MPR', beforeSub: 'dengan suara terbanyak', after: 'Dipilih langsung oleh rakyat', afterSub: 'satu pasangan, Pasal 6A',
+        note: 'Pemilihan langsung memperkuat legitimasi presiden dan mempertegas sistem presidensial — presiden bertanggung jawab kepada rakyat, bukan kepada MPR.' }
+    ];
+
+    const QUESTIONS = [
+      { q: 'Lembaga negara manakah yang dihapuskan pada Amandemen IV UUD 1945?',
+        options: ['Dewan Pertimbangan Agung (DPA)', 'Dewan Perwakilan Daerah (DPD)', 'Badan Pemeriksa Keuangan (BPK)', 'Mahkamah Agung (MA)'], answer: 0,
+        explain: 'Amandemen IV (2002) menghapus Bab IV tentang DPA. Fungsi pemberian nasihat kepada presiden kini dijalankan dewan pertimbangan di bawah presiden (Pasal 16).' },
+      { q: 'Berapakah alokasi minimal anggaran pendidikan menurut Pasal 31 ayat (4)?',
+        options: ['10% dari APBN dan APBD', '15% dari APBN dan APBD', '20% dari APBN dan APBD', '25% dari APBN dan APBD'], answer: 2,
+        explain: 'Pasal 31 ayat (4) hasil Amandemen IV mewajibkan negara memprioritaskan anggaran pendidikan sekurang-kurangnya 20% dari APBN serta APBD.' },
+      { q: 'Perubahan pasal berapa yang mengatur pembatasan masa jabatan presiden maksimal dua periode?',
+        options: ['Pasal 6A', 'Pasal 7', 'Pasal 20', 'Pasal 37'], answer: 1,
+        explain: 'Pasal 7 hasil Amandemen I (1999): presiden dan wakil presiden memegang jabatan lima tahun dan dapat dipilih kembali hanya untuk satu kali masa jabatan.' },
+      { q: 'Dua lembaga baru di bidang kekuasaan kehakiman hasil amandemen adalah…',
+        options: ['MA dan BPK', 'DPD dan MK', 'MK dan KY', 'KY dan DPA'], answer: 2,
+        explain: 'Amandemen III (2001) melahirkan Mahkamah Konstitusi (Pasal 24C) dan Komisi Yudisial (Pasal 24B). DPD juga lembaga baru, tetapi berada di ranah legislatif.' },
+      { q: 'Prinsip amandemen dengan tetap mempertahankan teks asli dan menambahkan perubahan disebut…',
+        options: ['Renewal', 'Adendum', 'Revisi total', 'Kodifikasi'], answer: 1,
+        explain: 'Adendum berarti perubahan dilekatkan pada naskah asli. Karena itu muncul pasal sisipan seperti 6A, 7A, dan 28A–28J tanpa mengganti nomor lama.' },
+      { q: 'Sejak amandemen, presiden dan wakil presiden dipilih dengan cara…',
+        options: ['Dipilih oleh MPR', 'Dipilih oleh DPR', 'Dipilih langsung oleh rakyat dalam satu pasangan', 'Ditunjuk oleh partai pemenang pemilu'], answer: 2,
+        explain: 'Pasal 6A ayat (1) hasil Amandemen III: presiden dan wakil presiden dipilih dalam satu pasangan secara langsung oleh rakyat.' },
+      { q: 'Bagian UUD 1945 yang disepakati MPR untuk TIDAK diubah sama sekali adalah…',
+        options: ['Batang Tubuh', 'Pembukaan', 'Aturan Peralihan', 'Penjelasan'], answer: 1,
+        explain: 'Kesepakatan dasar pertama MPR: Pembukaan UUD 1945 tidak diubah karena memuat dasar negara Pancasila dan tujuan nasional.' },
+      { q: 'Setelah amandemen, kedudukan MPR dalam struktur ketatanegaraan adalah…',
+        options: ['Lembaga tertinggi negara', 'Lembaga tinggi negara yang setara dengan lembaga lain', 'Bagian dari DPR', 'Lembaga di bawah presiden'], answer: 1,
+        explain: 'Perubahan Pasal 1 ayat (2) menjadikan MPR lembaga tinggi negara yang sejajar dengan presiden, DPR, DPD, MA, MK, BPK, dan KY.' }
+    ];
+
+    /* ---------------- HELPERS ---------------- */
+    const $ = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+    const esc = (str) => String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------------- NAVBAR ---------------- */
+    const topbar = $('#topbar');
+    const onScroll = () => {
+      topbar.classList.toggle('shadow-md', window.scrollY > 8);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const menuBtn = $('#menuBtn'), mobileMenu = $('#mobileMenu');
+    menuBtn.addEventListener('click', () => {
+      const open = mobileMenu.classList.toggle('hidden') === false;
+      menuBtn.setAttribute('aria-expanded', String(open));
+    });
+    $$('#mobileMenu a').forEach(a => a.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden'); menuBtn.setAttribute('aria-expanded', 'false');
+    }));
+
+    /* ---------------- COUNTERS ---------------- */
+    const runCounter = (el) => {
+      const target = +el.dataset.target;
+      if (reduceMotion) { el.textContent = target; return; }
+      const dur = 1200, start = performance.now();
+      const tick = (now) => {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    /* ---------------- B. AGREEMENTS ---------------- */
+    $('#agreeGrid').innerHTML = AGREEMENTS.map((a, i) => `
+      <button type="button" class="agree-card reveal group text-left w-full rounded-xl bg-white border border-slate-200/80 shadow-soft hover:shadow-lift hover:-translate-y-0.5 p-5 sm:p-6 transition duration-300 ${i === 4 ? 'sm:col-span-2 lg:col-span-1' : ''}" aria-expanded="false">
+        <div class="flex items-start gap-4">
+          <span class="agree-num shrink-0 w-12 h-12 rounded-xl bg-marun-50 text-marun grid place-items-center font-serif font-extrabold text-xl transition-colors">${i + 1}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <svg class="w-5 h-5 text-emas-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">${ICONS[a.icon]}</svg>
+              <svg class="agree-chevron w-5 h-5 text-slate-400 group-hover:text-marun transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <h3 class="mt-2 font-bold text-slate-900 leading-snug">${esc(a.title)}</h3>
+          </div>
+        </div>
+        <div class="agree-detail"><div><p class="pt-4 mt-4 border-t border-dashed border-emas-200 text-sm text-slate-600 leading-relaxed">${esc(a.body)}</p></div></div>
+      </button>`).join('');
+
+    $$('.agree-card').forEach(card => card.addEventListener('click', () => {
+      card.setAttribute('aria-expanded', String(card.getAttribute('aria-expanded') !== 'true'));
+    }));
+
+    /* ---------------- C. TIMELINE ---------------- */
+    let stageIdx = 0;
+    const tlSteps = $('#tlSteps'), tlPanelWrap = $('#tlPanelWrap'), tlProgress = $('#tlProgress');
+
+    tlSteps.innerHTML = STAGES.map((s, i) => `
+      <button type="button" role="tab" id="tl-tab-${i}" aria-controls="tl-panel" aria-selected="false" tabindex="-1" data-i="${i}"
+        class="tl-step flex flex-col items-center gap-2 px-1 focus:outline-none group">
+        <span class="tl-dot w-12 h-12 rounded-full border-2 border-slate-200 bg-white text-slate-500 grid place-items-center font-serif font-bold text-base sm:text-lg transition-all duration-300 group-hover:border-emas-500 group-focus-visible:ring-4 group-focus-visible:ring-emas-200">${s.no}</span>
+        <span class="tl-label text-xs sm:text-sm font-bold text-slate-500 transition-colors">${s.year}</span>
+        <span class="hidden md:block text-[11px] text-slate-400 text-center leading-tight max-w-[10rem]">${esc(s.theme)}</span>
+      </button>`).join('');
+
+    const renderStage = (i, focus = false) => {
+      stageIdx = i;
+      const s = STAGES[i];
+      $$('.tl-step', tlSteps).forEach((b, j) => {
+        b.setAttribute('aria-selected', String(j === i));
+        b.tabIndex = j === i ? 0 : -1;
+        $('.tl-dot', b).classList.toggle('text-slate-500', j > i);
+        $('.tl-dot', b).classList.toggle('border-emas-500', j < i);
+        $('.tl-dot', b).classList.toggle('text-marun', j < i);
+      });
+      if (focus) $(`#tl-tab-${i}`).focus();
+      tlProgress.style.width = `${(i / (STAGES.length - 1)) * 75}%`;
+      $('#tlPrev').disabled = i === 0;
+      $('#tlNext').disabled = i === STAGES.length - 1;
+
+      tlPanelWrap.innerHTML = `
+        <div id="tl-panel" role="tabpanel" aria-labelledby="tl-tab-${i}" class="tl-panel grid lg:grid-cols-[1fr_1.5fr] gap-6 lg:gap-10">
+          <div class="rounded-xl bg-gradient-to-br from-marun to-marun-900 text-white p-6 relative overflow-hidden">
+            <div class="absolute inset-0 hero-pattern opacity-40" aria-hidden="true"></div>
+            <div class="relative">
+              <p class="text-xs font-bold uppercase tracking-[.16em] text-emas-200">Perubahan ${s.no}</p>
+              <p class="mt-1 font-serif font-extrabold text-5xl text-white">${s.year}</p>
+              <p class="mt-3 text-lg font-bold leading-snug">${esc(s.theme)}</p>
+              <div class="mt-5 space-y-2 text-sm text-red-50/85">
+                <p class="flex items-center gap-2"><svg class="w-4 h-4 text-emas-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>Disahkan ${esc(s.date)}</p>
+                <p class="flex items-center gap-2"><svg class="w-4 h-4 text-emas-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 10h16M12 3l9 5H3l9-5zM6 10v11m4-11v11m4-11v11m4-11v11"/></svg>${esc(s.forum)}</p>
+              </div>
+              <p class="mt-5 text-sm leading-relaxed text-red-50/90 border-t border-white/15 pt-4">${esc(s.intro)}</p>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">Fokus Perubahan</h3>
+            <ul class="mt-4 space-y-3">
+              ${s.points.map(p => `
+                <li class="flex gap-3 sm:gap-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-emas-50 hover:border-emas-200 p-4 transition">
+                  <span class="shrink-0 self-start rounded-md bg-white border border-emas-200 text-emas-700 text-[11px] sm:text-xs font-bold px-2 py-1 whitespace-nowrap">${esc(p.pasal)}</span>
+                  <p class="text-sm sm:text-[15px] text-slate-700 leading-relaxed">${esc(p.text)}</p>
+                </li>`).join('')}
+            </ul>
+          </div>
+        </div>`;
+    };
+
+    tlSteps.addEventListener('click', e => {
+      const b = e.target.closest('.tl-step'); if (b) renderStage(+b.dataset.i);
+    });
+    tlSteps.addEventListener('keydown', e => {
+      const map = { ArrowRight: 1, ArrowLeft: -1, Home: -Infinity, End: Infinity };
+      if (!(e.key in map)) return;
+      e.preventDefault();
+      const next = Math.max(0, Math.min(STAGES.length - 1, stageIdx + map[e.key]));
+      renderStage(next, true);
+    });
+    $('#tlPrev').addEventListener('click', () => stageIdx > 0 && renderStage(stageIdx - 1));
+    $('#tlNext').addEventListener('click', () => stageIdx < STAGES.length - 1 && renderStage(stageIdx + 1));
+    renderStage(0);
+
+    /* ---------------- D. COMPARISON ---------------- */
+    $('#cmpRows').innerHTML = COMPARE.map((r, i) => `
+      <div class="cmp-row border-b border-slate-100 last:border-b-0">
+        <button type="button" class="cmp-toggle w-full text-left grid grid-cols-1 sm:grid-cols-[1.1fr_1fr_1fr_auto] gap-3 sm:gap-4 px-4 sm:px-6 py-5 hover:bg-slate-50/80 transition" aria-expanded="false" aria-controls="cmp-note-${i}">
+          <div class="flex items-center justify-between sm:block">
+            <span class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-md bg-emas-50 text-emas-700 grid place-items-center text-xs font-extrabold">${i + 1}</span>
+              <span class="font-bold text-slate-900">${esc(r.aspect)}</span>
+            </span>
+            <svg class="cmp-chevron sm:hidden w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="col-sebelum rounded-lg sm:rounded-none bg-slate-50 sm:bg-transparent p-3 sm:p-0">
+            <span class="sm:hidden block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Sebelum</span>
+            <span class="block font-semibold text-slate-500">${esc(r.before)}</span>
+            ${r.beforeSub ? `<span class="block text-xs text-slate-400 mt-0.5">${esc(r.beforeSub)}</span>` : ''}
+          </div>
+          <div class="col-sesudah rounded-lg sm:rounded-none bg-marun-50 sm:bg-transparent p-3 sm:p-0">
+            <span class="sm:hidden block text-[10px] font-bold uppercase tracking-wider text-marun mb-1">Sesudah</span>
+            <span class="flex items-center gap-1.5 font-bold text-marun">
+              <svg class="w-4 h-4 text-emas-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>${esc(r.after)}
+            </span>
+            ${r.afterSub ? `<span class="block text-xs text-slate-500 mt-0.5">${esc(r.afterSub)}</span>` : ''}
+          </div>
+          <svg class="cmp-chevron hidden sm:block w-5 h-5 text-slate-400 self-center transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="cmp-note-${i}" class="cmp-note"><div>
+          <div class="mx-4 sm:mx-6 mb-5 flex gap-3 rounded-lg border-l-4 border-emas-500 bg-emas-50 px-4 py-3">
+            <svg class="w-5 h-5 text-emas-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-6m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="text-sm text-slate-700 leading-relaxed"><span class="font-bold text-emas-700">Mengapa berubah? </span>${esc(r.note)}</p>
+          </div>
+        </div></div>
+      </div>`).join('');
+
+    $$('.cmp-toggle').forEach(btn => btn.addEventListener('click', () => {
+      const row = btn.closest('.cmp-row');
+      const open = row.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', String(open));
+    }));
+
+    const cmpTable = $('#cmpTable');
+    const header = $('#cmpTable > div');
+    const setMode = (mode) => {
+      cmpTable.dataset.mode = mode;
+      $$('.seg-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+      const cols = mode === 'both' ? 'sm:grid-cols-[1.1fr_1fr_1fr_auto]' : 'sm:grid-cols-[1.1fr_2fr_auto]';
+      [header, ...$$('.cmp-toggle')].forEach(el => {
+        el.classList.remove('sm:grid-cols-[1.1fr_1fr_1fr_auto]', 'sm:grid-cols-[1.1fr_2fr_auto]');
+        el.classList.add(cols);
+      });
+    };
+    $$('.seg-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+    /* ---------------- E. QUIZ ---------------- */
+    const quizCard = $('#quizCard');
+    const LETTERS = ['A', 'B', 'C', 'D'];
+    let order = [], qIdx = 0, score = 0, answers = [];
+
+    const shuffle = (arr) => {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+      return a;
+    };
+
+    const startQuiz = () => {
+      // Shuffle questions and their options for each attempt
+      order = shuffle(QUESTIONS.map((q, i) => i)).map(i => {
+        const q = QUESTIONS[i];
+        const opts = shuffle(q.options.map((text, k) => ({ text, correct: k === q.answer })));
+        return { ...q, opts };
+      });
+      qIdx = 0; score = 0; answers = [];
+      renderIntro();
+    };
+
+    const renderIntro = () => {
+      quizCard.innerHTML = `
+        <div class="p-6 sm:p-10 text-center">
+          <div class="mx-auto w-16 h-16 rounded-2xl bg-marun text-emas-200 grid place-items-center shadow-lift">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+          </div>
+          <h3 class="mt-5 font-serif font-bold text-2xl text-marun-900">Siap menguji pemahamanmu?</h3>
+          <p class="mt-2 text-slate-600">${order.length} soal pilihan ganda · umpan balik instan · penjelasan di setiap soal</p>
+          <button id="quizStart" class="mt-7 inline-flex items-center gap-2 rounded-xl bg-marun hover:bg-marun-700 text-white font-bold px-6 py-3 shadow-lift transition">
+            Mulai Kuis
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>`;
+      $('#quizStart').addEventListener('click', () => renderQuestion());
+    };
+
+    const renderQuestion = () => {
+      const q = order[qIdx];
+      const pct = (qIdx / order.length) * 100;
+      quizCard.innerHTML = `
+        <div class="px-5 sm:px-8 pt-6">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-bold text-marun">Soal ${qIdx + 1} <span class="text-slate-400 font-semibold">/ ${order.length}</span></span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emas-50 border border-emas-200 px-3 py-1 text-xs font-bold text-emas-700">
+              Skor: <span id="liveScore">${score}</span>
+            </span>
+          </div>
+          <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="${order.length}" aria-valuenow="${qIdx}" aria-label="Kemajuan kuis">
+            <div id="qBar" class="h-full rounded-full bg-gradient-to-r from-marun to-emas-500 transition-all duration-500" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div class="px-5 sm:px-8 py-6 sm:py-8 tl-panel">
+          <h3 class="font-bold text-lg sm:text-xl text-slate-900 leading-snug">${esc(q.q)}</h3>
+          <div class="mt-5 space-y-3" role="group" aria-label="Pilihan jawaban">
+            ${q.opts.map((o, k) => `
+              <button type="button" class="opt w-full flex items-center gap-3 sm:gap-4 rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left font-medium text-slate-700" data-k="${k}">
+                <span class="opt-letter shrink-0 w-8 h-8 rounded-lg bg-slate-100 text-slate-600 grid place-items-center text-sm font-extrabold">${LETTERS[k]}</span>
+                <span class="flex-1">${esc(o.text)}</span>
+                <span class="opt-icon shrink-0"></span>
+              </button>`).join('')}
+          </div>
+          <div id="qFeedback" aria-live="polite"></div>
+        </div>`;
+
+      $$('.opt', quizCard).forEach(btn => btn.addEventListener('click', () => choose(+btn.dataset.k)));
+    };
+
+    const ICON_OK = '<svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+    const ICON_NO = '<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+    const choose = (k) => {
+      const q = order[qIdx];
+      const isRight = q.opts[k].correct;
+      if (isRight) score++;
+      answers.push({ q: q.q, correct: isRight, picked: q.opts[k].text, right: q.opts.find(o => o.correct).text });
+
+      $$('.opt', quizCard).forEach((btn, j) => {
+        btn.disabled = true;
+        const letter = $('.opt-letter', btn);
+        if (q.opts[j].correct) {
+          btn.classList.add('is-correct');
+          letter.className = 'opt-letter shrink-0 w-8 h-8 rounded-lg bg-emerald-500 text-white grid place-items-center text-sm font-extrabold';
+          $('.opt-icon', btn).innerHTML = ICON_OK;
+        } else if (j === k) {
+          btn.classList.add('is-wrong');
+          letter.className = 'opt-letter shrink-0 w-8 h-8 rounded-lg bg-red-500 text-white grid place-items-center text-sm font-extrabold';
+          $('.opt-icon', btn).innerHTML = ICON_NO;
+        } else {
+          btn.classList.add('is-dim');
+        }
+      });
+      $('#liveScore').textContent = score;
+      $('#qBar').style.width = `${((qIdx + 1) / order.length) * 100}%`;
+
+      const last = qIdx === order.length - 1;
+      $('#qFeedback').innerHTML = `
+        <div class="tl-panel mt-6 rounded-xl border ${isRight ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'} p-4 sm:p-5">
+          <p class="font-bold ${isRight ? 'text-emerald-700' : 'text-red-700'}">${isRight ? 'Tepat sekali!' : 'Belum tepat.'}</p>
+          <p class="mt-1 text-sm text-slate-700 leading-relaxed">${esc(q.explain)}</p>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button id="qNext" class="inline-flex items-center gap-2 rounded-xl bg-marun hover:bg-marun-700 text-white font-bold px-5 py-3 shadow-sm transition">
+            ${last ? 'Lihat Hasil' : 'Soal Berikutnya'}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>`;
+      const next = $('#qNext');
+      next.focus({ preventScroll: true });
+      next.addEventListener('click', () => {
+        if (last) renderResult(); else { qIdx++; renderQuestion(); }
+        quizCard.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+      });
+    };
+
+    const renderResult = () => {
+      const total = order.length, pct = Math.round((score / total) * 100);
+      const R = 54, C = 2 * Math.PI * R;
+      const verdict =
+        pct === 100 ? { t: 'Sempurna! Penjaga Konstitusi sejati.', d: 'Kamu menguasai seluruh materi amandemen dengan sangat baik.' } :
+        pct >= 75  ? { t: 'Hebat! Pemahamanmu sudah kuat.', d: 'Tinjau kembali soal yang terlewat untuk menyempurnakannya.' } :
+        pct >= 50  ? { t: 'Cukup baik, terus belajar!', d: 'Coba telusuri lagi linimasa dan tabel komparasi di atas.' } :
+                     { t: 'Ayo pelajari sekali lagi.', d: 'Baca ulang materi di atas, lalu coba kuisnya kembali.' };
+
+      quizCard.innerHTML = `
+        <div class="p-6 sm:p-10 tl-panel">
+          <div class="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+            <div class="relative w-36 h-36 shrink-0">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+                <circle cx="60" cy="60" r="${R}" fill="none" stroke="#F1F5F9" stroke-width="12"/>
+                <circle id="ring" class="ring-progress" cx="60" cy="60" r="${R}" fill="none" stroke="url(#gradRing)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
+                <defs><linearGradient id="gradRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B0000"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs>
+              </svg>
+              <div class="absolute inset-0 grid place-items-center text-center">
+                <div><p class="font-serif font-extrabold text-4xl text-marun">${score}<span class="text-xl text-slate-400">/${total}</span></p><p class="text-xs font-bold text-emas-600">${pct}%</p></div>
+              </div>
+            </div>
+            <div class="text-center sm:text-left">
+              <p class="text-xs font-bold uppercase tracking-[.18em] text-emas-600">Skor Akhir</p>
+              <h3 class="mt-1 font-serif font-bold text-2xl text-marun-900">${verdict.t}</h3>
+              <p class="mt-2 text-slate-600">${verdict.d}</p>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h4 class="text-sm font-bold uppercase tracking-wider text-slate-500">Ringkasan Jawaban</h4>
+            <ol class="mt-3 space-y-2">
+              ${answers.map((a, i) => `
+                <li class="flex gap-3 rounded-lg border ${a.correct ? 'border-emerald-100 bg-emerald-50/50' : 'border-red-100 bg-red-50/50'} p-3 text-sm">
+                  <span class="shrink-0 mt-0.5">${a.correct ? ICON_OK.replace('w-6 h-6', 'w-5 h-5') : ICON_NO.replace('w-6 h-6', 'w-5 h-5')}</span>
+                  <span class="text-slate-700"><span class="font-semibold">${i + 1}. ${esc(a.q)}</span>
+                    ${a.correct ? '' : `<span class="block mt-1 text-xs text-slate-500">Jawabanmu: <span class="text-red-600 font-semibold">${esc(a.picked)}</span> · Benar: <span class="text-emerald-700 font-semibold">${esc(a.right)}</span></span>`}
+                  </span>
+                </li>`).join('')}
+            </ol>
+          </div>
+
+          <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:justify-center">
+            <button id="quizRetry" class="inline-flex justify-center items-center gap-2 rounded-xl bg-marun hover:bg-marun-700 text-white font-bold px-6 py-3 shadow-lift transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Ulangi Kuis
+            </button>
+            <a href="#linimasa" class="inline-flex justify-center items-center gap-2 rounded-xl border border-slate-200 hover:border-emas-500 hover:bg-emas-50 font-semibold text-slate-700 px-6 py-3 transition">Pelajari Ulang Materi</a>
+          </div>
+        </div>`;
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        $('#ring').style.strokeDashoffset = String(C * (1 - score / total));
+      }));
+      $('#quizRetry').addEventListener('click', () => { startQuiz(); renderQuestion(); });
+    };
+
+    startQuiz();
+
+    /* ---------------- REVEAL ON SCROLL ---------------- */
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('is-visible');
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }) : null;
+
+    $$('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('is-visible'));
+
+    const counterIO = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      entries.forEach(en => { if (en.isIntersecting) { runCounter(en.target); counterIO.unobserve(en.target); } });
+    }, { threshold: 0.5 }) : null;
+    $$('.counter').forEach(el => counterIO ? counterIO.observe(el) : runCounter(el));
+  })();
+  </script>
+</body>
+</html>
